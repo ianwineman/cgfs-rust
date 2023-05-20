@@ -1,6 +1,7 @@
 pub const CW: i32 = 600;
 pub const CH: i32 = 600;
 const TMAX: f32 = f32::MAX;
+const BACKGROUNDCOLOR: [u8; 3] = [255, 255, 255];
 
 pub struct Scene {
     pub spheres: Vec<Sphere>,
@@ -30,7 +31,7 @@ impl Viewport {
 
 pub fn trace_ray(origin: [f32; 3], direction: [f32; 3], t_min: f32, scene:&Scene) -> [u8; 3] {
     let mut closest_t: f32 = TMAX;
-    let mut closest_sphere: &Sphere = &Sphere { center: [0.0, 0.0, 0.0], radius: 0.0, color: [255, 255, 255] };
+    let mut closest_sphere: &Sphere = &Sphere { center: [0.0, 0.0, 0.0], radius: 0.0, color: BACKGROUNDCOLOR };
 
     for sphere in &scene.spheres {
         let (t1, t2): (f32, f32) = intersect_ray_sphere(origin, direction, sphere);
