@@ -12,6 +12,7 @@ pub struct Sphere {
     pub center: [f32; 3],
     pub radius: f32,
     pub color: [u8; 3],
+    pub specular: f32,
 }
 
 pub struct Viewport {
@@ -38,7 +39,7 @@ pub enum Light {
 
 pub fn trace_ray(origin: [f32; 3], direction: [f32; 3], t_min: f32, scene:&Scene) -> [u8; 3] {
     let mut closest_t: f32 = TMAX;
-    let mut closest_sphere: &Sphere = &Sphere { center: [0.0, 0.0, 0.0], radius: 0.0, color: BACKGROUNDCOLOR };
+    let mut closest_sphere: &Sphere = &Sphere { center: [0.0, 0.0, 0.0], radius: 0.0, color: BACKGROUNDCOLOR, specular: -1.0 };
     let mut background: bool = true;
 
     for sphere in &scene.spheres {
@@ -74,10 +75,16 @@ pub fn trace_ray(origin: [f32; 3], direction: [f32; 3], t_min: f32, scene:&Scene
             normal[1] / normal_len,
             normal[2] / normal_len
         ];
-        let lighting: f32 = compute_lighting(point, unit_normal, &scene);
+        let lighting: f32 = compute_lighting(
+            point, 
+            unit_normal, 
+            &scene, 
+            [-direction[0], -direction[1], -direction[2]], 
+            closest_sphere.specular
+        );
 
         return [
-            (closest_sphere.color[0] as f32 * lighting).round() as u8,
+            (closest_sphere.color[0] as f32 * lighting).round() as u8, // might need to slice to 255 since specular can make lighting > 1
             (closest_sphere.color[1] as f32 * lighting).round() as u8,
             (closest_sphere.color[2] as f32 * lighting).round() as u8
         ]
@@ -124,7 +131,7 @@ pub fn render_scene(mut canvas: image::RgbImage, scene: Scene, viewport: Viewpor
     canvas.save("image.png").unwrap();
 }
 
-pub fn compute_lighting(point: [f32; 3], normal: [f32; 3], scene: &Scene) -> f32 {
+pub fn compute_lighting(point: [f32; 3], normal: [f32; 3], scene: &Scene, view: [f32; 3], specular: f32) -> f32 {
     let mut total_intensity: f32 = 0.0;
 
     for light in &scene.lights {
@@ -132,6 +139,8 @@ pub fn compute_lighting(point: [f32; 3], normal: [f32; 3], scene: &Scene) -> f32
             Light::Ambient { intensity } => total_intensity += intensity,
             Light::Point { intensity, position } => {
                 let l: [f32; 3] = [position[0] - point[0], position[1] - point[1], position[2] - point[2]];
+
+                // Diffuse
                 let normal_dot_l: f32 = (normal[0] * l[0]) + (normal[1] * l[1]) + (normal[2] * l[2]);
 
                 if normal_dot_l > 0.0 {
@@ -140,9 +149,16 @@ pub fn compute_lighting(point: [f32; 3], normal: [f32; 3], scene: &Scene) -> f32
                         (l[0] * l[0]) + (l[1] * l[1]) + (l[2] * l[2]).sqrt()
                     ))
                 }
+
+                // Specular
+                if specular != -1.0 {
+                    //
+                }
             }
             Light::Directional { intensity, direction } => {
                 let l: [f32; 3] = *direction;
+
+                // Diffuse
                 let normal_dot_l: f32 = (normal[0] * l[0]) + (normal[1] * l[1]) + (normal[2] * l[2]);
 
                 if normal_dot_l > 0.0 {
@@ -150,6 +166,11 @@ pub fn compute_lighting(point: [f32; 3], normal: [f32; 3], scene: &Scene) -> f32
                         (normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]).sqrt() *
                         (l[0] * l[0]) + (l[1] * l[1]) + (l[2] * l[2]).sqrt()
                     ))
+                }
+
+                // Specular
+                if specular != -1.0 {
+                    //
                 }
             }
         }

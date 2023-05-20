@@ -8,21 +8,25 @@ fn main() {
                 center: [0.0, -1.0, 3.0],
                 radius: 1.0,
                 color: [255, 0, 0],
+                specular: 500.0,
             },
             Sphere {
                 center: [2.0, 0.0, 4.0],
                 radius: 1.0,
                 color: [0, 0, 255],
+                specular: 500.0,
             },
             Sphere {
                 center: [-2.0, 0.0, 4.0],
                 radius: 1.0,
                 color: [0, 255, 0],
+                specular: 10.0,
             },
             Sphere {
                 center: [0.0, -5001.0, 0.0],
                 radius: 5000.0,
-                color: [255, 255, 0]
+                color: [255, 255, 0],
+                specular: 1000.0,
             }
         ]),
         lights: Vec::from([
