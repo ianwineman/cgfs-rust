@@ -18,7 +18,17 @@ fn main() {
                 center: [-2.0, 0.0, 4.0],
                 radius: 1.0,
                 color: [0, 255, 0],
+            },
+            Sphere {
+                center: [0.0, -5001.0, 0.0],
+                radius: 5000.0,
+                color: [255, 255, 0]
             }
+        ]),
+        lights: Vec::from([
+            Light::Ambient { intensity: 0.2 },
+            Light::Point { intensity: 0.6, position: [2.0, 1.0, 0.0] },
+            Light::Directional { intensity: 0.2, direction: [1.0, 4.0, 4.0] }
         ])
     };
 
